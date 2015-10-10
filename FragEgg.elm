@@ -10,7 +10,10 @@ import Time
 import Time exposing (Time)
 import Window
 
-type alias Input = ( Float, Element, Time)
+type alias Input = {
+  inputField: Element,
+  deltaTime: Time
+}
 type alias UI = {
   name: Element
 }
@@ -23,12 +26,11 @@ type alias State = {
 
 signalInput : Signal Input
 signalInput =
-  (\element time -> (3, element, time)) <~ nameField ~ (Time.fps 30)
+  (\element time -> {inputField=element, deltaTime=time}) <~ nameField ~ (Time.fps 30)
 
 upstate : Input -> State -> State
-upstate (x, nameField, timeDelta) s =
-  { s | value <- x,
-        ui <- { name=nameField } }
+upstate {inputField, deltaTime} s =
+  { s | ui <- { name=inputField } }
 
 initState : State
 initState = { value=3, ui={name=Element.empty}, equation=["1", "*", "3"]}
