@@ -22,7 +22,6 @@ type alias UI = {
 }
 type alias Equation = List String
 type alias State = {
-  value: Float,
   equation: Equation,
   inputString: Field.Content,
   errorMessage: Maybe String
@@ -55,7 +54,6 @@ upstate {inputString, deltaTime, isEnter} s =
 
 initState : State
 initState = {
-    value=3,
     inputString=Field.noContent,
     errorMessage=Nothing,
     equation=["1", "*", "3"]
@@ -79,7 +77,6 @@ view : (Int, Int) -> State -> Element
 view (w, h) s = 
   let allElements = Element.flow Element.down
         [
-          Element.show s.value,
           showEquation s.equation,
           nameField s.inputString,
           Element.color Color.red <| Element.show s.errorMessage
