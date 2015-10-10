@@ -1,4 +1,5 @@
 
+import Color
 import Graphics.Element exposing (Element)
 import Graphics.Element as Element
 import Graphics.Input.Field as Field
@@ -30,9 +31,12 @@ initState : State
 initState = { value=3, ui={name=Element.empty}}
 
 view : (Int, Int) -> State -> Element
-view _ s = 
-  Element.flow Element.down <|
-    [ Element.show s.value, s.ui.name ]
+view (w, h) s = 
+  let allElements = Element.flow Element.down [ Element.show s.value, s.ui.name ]
+      container = Element.container w h Element.middle allElements
+      coloredContainer = Element.color Color.brown <| container
+  in
+     coloredContainer
 
 name : Signal.Mailbox Field.Content
 name = Signal.mailbox Field.noContent
