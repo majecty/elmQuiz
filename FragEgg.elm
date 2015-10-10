@@ -1,23 +1,45 @@
 
 import Graphics.Element exposing (Element)
 import Graphics.Element as Element
+import Graphics.Input.Field as Field
 import Signal
+import Signal exposing ((<~), (~))
+import Time
+import Time exposing (Time)
 import Window
 
-type alias Input = Float
-type alias State = Float
+type alias Input = ( Float, Element, Time)
+type alias UI = {
+  name: Element
+}
+type alias State = {
+  value: Float,
+  ui: UI
+}
 
 signalInput : Signal Input
-signalInput = Signal.constant 3
+signalInput =
+  (\element time -> (3, element, time)) <~ nameField ~ (Time.fps 30)
 
 upstate : Input -> State -> State
-upstate _ s = s
+upstate (x, nameField, timeDelta) s =
+  { s | value <- x,
+        ui <- { name=nameField } }
 
 initState : State
-initState = 3
+initState = { value=3, ui={name=Element.empty}}
 
 view : (Int, Int) -> State -> Element
-view _ s = Element.show s
+view _ s = 
+  Element.flow Element.down <|
+    [ Element.show s.value, s.ui.name ]
+
+name : Signal.Mailbox Field.Content
+name = Signal.mailbox Field.noContent
+
+nameField : Signal Element
+nameField =
+  Field.field Field.defaultStyle (Signal.message name.address) "Name" <~ name.signal
 
 main : Signal Element
 main =
