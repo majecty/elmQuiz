@@ -11,7 +11,7 @@ import Time exposing (Time)
 import Window
 
 type alias Input = {
-  inputField: Element,
+  inputString: Field.Content,
   deltaTime: Time
 }
 type alias UI = {
@@ -21,19 +21,20 @@ type alias Equation = List String
 type alias State = {
   value: Float,
   equation: Equation,
-  ui: UI
+  inputString: Field.Content
 }
 
 signalInput : Signal Input
 signalInput =
-  (\element time -> {inputField=element, deltaTime=time}) <~ nameField ~ (Time.fps 30)
+  (\inputString time ->
+    {inputString=inputString, deltaTime=time}) <~ name.signal ~ (Time.fps 30)
 
 upstate : Input -> State -> State
-upstate {inputField, deltaTime} s =
-  { s | ui <- { name=inputField } }
+upstate {inputString, deltaTime} s =
+  { s | inputString <- inputString }
 
 initState : State
-initState = { value=3, ui={name=Element.empty}, equation=["1", "*", "3"]}
+initState = { value=3, inputString=Field.noContent, equation=["1", "*", "3"]}
 
 hideOperator : String -> String
 hideOperator input = case input of
@@ -52,7 +53,7 @@ showEquation equation =
 view : (Int, Int) -> State -> Element
 view (w, h) s = 
   let allElements = Element.flow Element.down
-        [ Element.show s.value, showEquation s.equation, s.ui.name ]
+        [ Element.show s.value, showEquation s.equation, nameField s.inputString]
       container = Element.container w h Element.middle allElements
       coloredContainer = Element.color Color.brown <| container
   in
@@ -61,9 +62,9 @@ view (w, h) s =
 name : Signal.Mailbox Field.Content
 name = Signal.mailbox Field.noContent
 
-nameField : Signal Element
-nameField =
-  Field.field Field.defaultStyle (Signal.message name.address) "Name" <~ name.signal
+nameField : Field.Content -> Element
+nameField content =
+  Field.field Field.defaultStyle (Signal.message name.address) "Name" content
 
 main : Signal Element
 main =
