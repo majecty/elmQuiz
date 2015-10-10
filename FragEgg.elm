@@ -3,6 +3,7 @@ import Color
 import Graphics.Element exposing (Element)
 import Graphics.Element as Element
 import Graphics.Input.Field as Field
+import Keyboard
 import Signal
 import Signal exposing ((<~), (~))
 import String
@@ -12,6 +13,7 @@ import Window
 
 type alias Input = {
   inputString: Field.Content,
+  isEnter: Bool,
   deltaTime: Time
 }
 type alias UI = {
@@ -26,8 +28,13 @@ type alias State = {
 
 signalInput : Signal Input
 signalInput =
-  (\inputString time ->
-    {inputString=inputString, deltaTime=time}) <~ name.signal ~ (Time.fps 30)
+  let setter = (\inputString time isEnter -> {
+      inputString=inputString,
+      deltaTime=time,
+      isEnter=isEnter
+    })
+  in
+    setter <~ name.signal ~ (Time.fps 30) ~ Keyboard.enter
 
 upstate : Input -> State -> State
 upstate {inputString, deltaTime} s =
@@ -53,7 +60,11 @@ showEquation equation =
 view : (Int, Int) -> State -> Element
 view (w, h) s = 
   let allElements = Element.flow Element.down
-        [ Element.show s.value, showEquation s.equation, nameField s.inputString]
+        [
+          Element.show s.value,
+          showEquation s.equation,
+          nameField s.inputString
+        ]
       container = Element.container w h Element.middle allElements
       coloredContainer = Element.color Color.brown <| container
   in
