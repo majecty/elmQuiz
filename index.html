@@ -9,6 +9,11 @@ body { font-family: calibri, helvetica, arial, sans-serif; }</style>
     <div id="quiz" style="width:100%; height:600px;"></div>
     <script type="text/javascript">
       var quizDiv = document.getElementById("quiz");
-      Elm.embed(Elm.Quiz, quizDiv)
+      var quiz = Elm.embed(Elm.Quiz, quizDiv, {evalEquationResult: 0});
+      quiz.ports.evalEquationResult.send(0);
+      quiz.ports.evalEquation.subscribe(function (string) {
+        quiz.ports.evalEquationResult.send(eval(string));
+        console.log("Result is " + eval(string));
+      });
     </script>
   </body></html>

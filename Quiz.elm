@@ -16,7 +16,8 @@ import Window
 type alias Input = {
   inputString: Field.Content,
   isEnter: Bool,
-  deltaTime: Time
+  deltaTime: Time,
+  equationResult: Float
 }
 type alias UI = {
   name: Element
@@ -25,21 +26,32 @@ type alias Equation = List String
 type alias State = {
   equation: Equation,
   inputString: Field.Content,
-  errorMessage: Maybe String
+  errorMessage: Maybe String,
+  equationResult: Float
 }
+
+port evalEquation : Signal String
+port evalEquation =
+  Signal.sampleOn (Time.fps 3) (Signal.constant "1*3")
+
+port evalEquationResult : Signal Float
 
 signalInput : Signal Input
 signalInput =
-  let setter = (\inputString isEnter -> {
+  let setter = (\inputString isEnter eqResult -> {
       inputString=inputString,
       deltaTime=0,
-      isEnter=isEnter
+      isEnter=isEnter,
+      equationResult=eqResult
     })
   in
-    setter <~ name.signal ~ Keyboard.enter
+    setter
+      <~ name.signal
+      ~ Keyboard.enter
+      ~ evalEquationResult
 
 upstate : Input -> State -> State
-upstate {inputString, deltaTime, isEnter} s =
+upstate {inputString, deltaTime, isEnter, equationResult} s =
   let errorMessage =
     if | isEnter && (String.isEmpty inputString.string)
        -> Nothing
@@ -51,13 +63,15 @@ upstate {inputString, deltaTime, isEnter} s =
        -> s.errorMessage
   in
   { s | inputString <- inputString,
-        errorMessage <- errorMessage }
+        errorMessage <- errorMessage,
+        equationResult <- equationResult }
 
 initState : State
 initState = {
     inputString=Field.noContent,
     errorMessage=Nothing,
-    equation=["x", "-", "1", "+", "3"]
+    equation=["x", "-", "1", "+", "3"],
+    equationResult=0
   }
 
 hideOperator : String -> String
@@ -80,7 +94,8 @@ view (w, h) s =
         [
           showEquation s.equation,
           nameField s.inputString,
-          Element.color Color.red <| Element.show s.errorMessage
+          Element.color Color.red <| Element.show s.errorMessage,
+          Element.show s.equationResult
         ]
       container = Element.container w h Element.middle allElements
       coloredContainer = Element.color Color.brown <| container
