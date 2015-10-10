@@ -4,6 +4,7 @@ import Graphics.Element exposing (Element)
 import Graphics.Element as Element
 import Graphics.Input.Field as Field
 import Keyboard
+import Maybe
 import Signal
 import Signal exposing ((<~), (~))
 import String
@@ -23,25 +24,42 @@ type alias Equation = List String
 type alias State = {
   value: Float,
   equation: Equation,
-  inputString: Field.Content
+  inputString: Field.Content,
+  errorMessage: Maybe String
 }
 
 signalInput : Signal Input
 signalInput =
-  let setter = (\inputString time isEnter -> {
+  let setter = (\inputString isEnter -> {
       inputString=inputString,
-      deltaTime=time,
+      deltaTime=0,
       isEnter=isEnter
     })
   in
-    setter <~ name.signal ~ (Time.fps 30) ~ Keyboard.enter
+    setter <~ name.signal ~ Keyboard.enter
 
 upstate : Input -> State -> State
-upstate {inputString, deltaTime} s =
-  { s | inputString <- inputString }
+upstate {inputString, deltaTime, isEnter} s =
+  let errorMessage =
+    if | isEnter && (String.isEmpty inputString.string)
+       -> Nothing
+
+       | isEnter
+       -> Just "Wrong Answer"
+
+       | otherwise
+       -> s.errorMessage
+  in
+  { s | inputString <- inputString,
+        errorMessage <- errorMessage }
 
 initState : State
-initState = { value=3, inputString=Field.noContent, equation=["1", "*", "3"]}
+initState = {
+    value=3,
+    inputString=Field.noContent,
+    errorMessage=Nothing,
+    equation=["1", "*", "3"]
+  }
 
 hideOperator : String -> String
 hideOperator input = case input of
@@ -63,7 +81,8 @@ view (w, h) s =
         [
           Element.show s.value,
           showEquation s.equation,
-          nameField s.inputString
+          nameField s.inputString,
+          Element.color Color.red <| Element.show s.errorMessage
         ]
       container = Element.container w h Element.middle allElements
       coloredContainer = Element.color Color.brown <| container
