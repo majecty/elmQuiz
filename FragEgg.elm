@@ -56,7 +56,7 @@ initState : State
 initState = {
     inputString=Field.noContent,
     errorMessage=Nothing,
-    equation=["1", "*", "3"]
+    equation=["x", "-", "1", "+", "3"]
   }
 
 hideOperator : String -> String
