@@ -1,3 +1,4 @@
+module Quiz where
 
 import Color
 import Graphics.Element exposing (Element)
