@@ -109,15 +109,22 @@ showEquation equation =
   in
      Element.show <| String.append "Problem is : " <| String.concat showableTokens
 
+stateToElement : State -> Element
+stateToElement state =
+  let maybeErrorElement = Maybe.map (Element.color Color.red << Element.show) state.errorMessage
+      errorElement = Maybe.withDefault Element.empty maybeErrorElement
+  in
+    Element.flow Element.down
+      [
+        showEquation state.equation,
+        nameField state.inputContent,
+        errorElement,
+        Element.show state.equationResult
+      ]
+
 view : (Int, Int) -> State -> Element
 view (w, h) s = 
-  let allElements = Element.flow Element.down
-        [
-          showEquation s.equation,
-          nameField s.inputContent,
-          Element.color Color.red <| Element.show s.errorMessage,
-          Element.show s.equationResult
-        ]
+  let allElements = stateToElement s
       container = Element.container w h Element.middle allElements
       coloredContainer = Element.color Color.brown <| container
   in
