@@ -107,7 +107,7 @@ showEquation : Equation -> Element
 showEquation equation =
   let showableTokens = List.map hideOperator equation
   in
-     Element.show <| String.concat showableTokens
+     Element.show <| String.append "Problem is : " <| String.concat showableTokens
 
 view : (Int, Int) -> State -> Element
 view (w, h) s = 
