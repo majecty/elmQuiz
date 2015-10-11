@@ -7,6 +7,7 @@ import Graphics.Input.Field as Field
 import List
 import Maybe
 import String
+import Text
 
 import Types exposing (Equation, State)
 
@@ -29,7 +30,8 @@ showEquation : Equation -> Element
 showEquation equation =
   let showableTokens = List.map hideOperator equation
   in
-     Element.show <| String.append "Problem is : " <| String.concat showableTokens
+     Element.leftAligned <| Text.fromString
+       <| String.append "Problem is : " <| String.concat showableTokens
 
 stateToElement : State -> Element
 stateToElement state =
@@ -41,7 +43,7 @@ stateToElement state =
         showEquation state.equation,
         xInputField state.xInputContent,
         errorElement,
-        Element.show state.equationResult
+        Element.leftAligned <| Text.fromString <| toString <| state.equationResult
       ]
 
 view : (Int, Int) -> State -> Element
