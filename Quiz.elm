@@ -43,7 +43,10 @@ filterMaybeSignal : Signal (Maybe String) -> Signal String
 filterMaybeSignal signalMaybeA = Signal.filterMap identity "1" signalMaybeA
 
 port evalEquation : Signal String
-port evalEquation = filterMaybeSignal <| stateToEquationString <~ signalState 
+port evalEquation =
+  let equation = filterMaybeSignal <| stateToEquationString <~ signalState 
+  in
+     Signal.sampleOn Keyboard.enter equation
 
 port evalEquationResult : Signal Float
 
