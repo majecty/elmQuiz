@@ -1,6 +1,7 @@
 module Quiz where
 
 import Color
+import Debug
 import Graphics.Element exposing (Element)
 import Graphics.Element as Element
 import Graphics.Input.Field as Field
@@ -9,6 +10,7 @@ import Maybe
 import Signal
 import Signal exposing ((<~), (~))
 import String
+import Regex
 import Time
 import Time exposing (Time)
 import Window
@@ -27,12 +29,21 @@ type alias State = {
   equation: Equation,
   inputContent: Field.Content,
   errorMessage: Maybe String,
-  equationResult: Float
+  equationResult: Float,
+  parsedXValue: Maybe Float
 }
 
+stateToEquationString : State -> Maybe String
+stateToEquationString state = 
+  Maybe.map
+    (\x -> String.concat <| applyX state.equation x)
+    state.parsedXValue
+
+filterMaybeSignal : Signal (Maybe String) -> Signal String
+filterMaybeSignal signalMaybeA = Signal.filterMap identity "1" signalMaybeA
+
 port evalEquation : Signal String
-port evalEquation =
-  Signal.sampleOn (Time.fps 3) (Signal.constant "1*3")
+port evalEquation = filterMaybeSignal <| stateToEquationString <~ signalState 
 
 port evalEquationResult : Signal Float
 
@@ -52,26 +63,27 @@ signalInput =
 
 upstate : Input -> State -> State
 upstate {inputContent, deltaTime, isEnter, equationResult} s =
-  let errorMessage =
-    if | isEnter && (String.isEmpty inputContent.string)
-       -> Nothing
+  let numberParseResult = String.toFloat inputContent.string
 
-       | isEnter
-       -> Just "Wrong Answer"
+      errorMessage = case numberParseResult of
+        Err message -> Just message
+        _ -> Nothing
 
-       | otherwise
-       -> s.errorMessage
+      parsedXValue = Debug.log "log parsedValue" <| Result.toMaybe numberParseResult
+      
   in
   { s | inputContent <- inputContent,
         errorMessage <- errorMessage,
-        equationResult <- equationResult }
+        equationResult <- equationResult,
+        parsedXValue <- parsedXValue}
 
 initState : State
 initState = {
     inputContent=Field.noContent,
     errorMessage=Nothing,
     equation=["x", "-", "1", "+", "3"],
-    equationResult=0
+    equationResult=0,
+    parsedXValue = Nothing
   }
 
 hideOperator : String -> String
@@ -81,6 +93,12 @@ hideOperator input = case input of
   "*" -> "ㅁ"
   "/" -> "ㅁ"
   _ -> input
+
+applyX : Equation -> Float -> Equation
+applyX prevEquation value = 
+  let valueToString = toString value
+  in
+     List.map (\s -> if s == "x" then valueToString else s) prevEquation
 
 showEquation : Equation -> Element
 showEquation equation =
@@ -109,7 +127,9 @@ nameField : Field.Content -> Element
 nameField content =
   Field.field Field.defaultStyle (Signal.message name.address) "Name" content
 
+signalState : Signal State
+signalState = Signal.foldp upstate initState signalInput
+
 main : Signal Element
 main =
-  Signal.map2 view Window.dimensions
-    (Signal.foldp upstate initState signalInput)
+  Signal.map2 view Window.dimensions signalState
