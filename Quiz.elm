@@ -15,23 +15,8 @@ import Time
 import Time exposing (Time)
 import Window
 
-type alias Input = {
-  inputContent: Field.Content,
-  isEnter: Bool,
-  deltaTime: Time,
-  equationResult: Float
-}
-type alias UI = {
-  name: Element
-}
-type alias Equation = List String
-type alias State = {
-  equation: Equation,
-  inputContent: Field.Content,
-  errorMessage: Maybe String,
-  equationResult: Float,
-  parsedXValue: Maybe Float
-}
+import View exposing (name, view)
+import Types exposing (Input, Equation, State)
 
 stateToEquationString : State -> Maybe String
 stateToEquationString state = 
@@ -92,53 +77,11 @@ initState = {
     parsedXValue = Nothing
   }
 
-hideOperator : String -> String
-hideOperator input = case input of
-  "+" -> "ㅁ"
-  "-" -> "ㅁ"
-  "*" -> "ㅁ"
-  "/" -> "ㅁ"
-  _ -> input
-
 applyX : Equation -> Float -> Equation
 applyX prevEquation value = 
   let valueToString = toString value
   in
      List.map (\s -> if s == "x" then valueToString else s) prevEquation
-
-showEquation : Equation -> Element
-showEquation equation =
-  let showableTokens = List.map hideOperator equation
-  in
-     Element.show <| String.append "Problem is : " <| String.concat showableTokens
-
-stateToElement : State -> Element
-stateToElement state =
-  let maybeErrorElement = Maybe.map (Element.color Color.red << Element.show) state.errorMessage
-      errorElement = Maybe.withDefault Element.empty maybeErrorElement
-  in
-    Element.flow Element.down
-      [
-        showEquation state.equation,
-        nameField state.inputContent,
-        errorElement,
-        Element.show state.equationResult
-      ]
-
-view : (Int, Int) -> State -> Element
-view (w, h) s = 
-  let allElements = stateToElement s
-      container = Element.container w h Element.middle allElements
-      coloredContainer = Element.color Color.brown <| container
-  in
-     coloredContainer
-
-name : Signal.Mailbox Field.Content
-name = Signal.mailbox Field.noContent
-
-nameField : Field.Content -> Element
-nameField content =
-  Field.field Field.defaultStyle (Signal.message name.address) "Name" content
 
 signalState : Signal State
 signalState = Signal.foldp upstate initState signalInput
