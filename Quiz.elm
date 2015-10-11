@@ -68,9 +68,12 @@ upstate : Input -> State -> State
 upstate {inputContent, deltaTime, isEnter, equationResult} s =
   let numberParseResult = String.toFloat inputContent.string
 
-      errorMessage = case numberParseResult of
-        Err message -> Just message
-        _ -> Nothing
+      errorMessage =
+        if inputContent.string == ""
+           then Nothing
+           else case numberParseResult of
+              Err message -> Just message
+              _ -> Nothing
 
       parsedXValue = Debug.log "log parsedValue" <| Result.toMaybe numberParseResult
       
