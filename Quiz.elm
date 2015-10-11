@@ -14,7 +14,7 @@ import Time exposing (Time)
 import Window
 
 type alias Input = {
-  inputString: Field.Content,
+  inputContent: Field.Content,
   isEnter: Bool,
   deltaTime: Time,
   equationResult: Float
@@ -25,7 +25,7 @@ type alias UI = {
 type alias Equation = List String
 type alias State = {
   equation: Equation,
-  inputString: Field.Content,
+  inputContent: Field.Content,
   errorMessage: Maybe String,
   equationResult: Float
 }
@@ -38,8 +38,8 @@ port evalEquationResult : Signal Float
 
 signalInput : Signal Input
 signalInput =
-  let setter = (\inputString isEnter eqResult -> {
-      inputString=inputString,
+  let setter = (\inputContent isEnter eqResult -> {
+      inputContent=inputContent,
       deltaTime=0,
       isEnter=isEnter,
       equationResult=eqResult
@@ -51,9 +51,9 @@ signalInput =
       ~ evalEquationResult
 
 upstate : Input -> State -> State
-upstate {inputString, deltaTime, isEnter, equationResult} s =
+upstate {inputContent, deltaTime, isEnter, equationResult} s =
   let errorMessage =
-    if | isEnter && (String.isEmpty inputString.string)
+    if | isEnter && (String.isEmpty inputContent.string)
        -> Nothing
 
        | isEnter
@@ -62,13 +62,13 @@ upstate {inputString, deltaTime, isEnter, equationResult} s =
        | otherwise
        -> s.errorMessage
   in
-  { s | inputString <- inputString,
+  { s | inputContent <- inputContent,
         errorMessage <- errorMessage,
         equationResult <- equationResult }
 
 initState : State
 initState = {
-    inputString=Field.noContent,
+    inputContent=Field.noContent,
     errorMessage=Nothing,
     equation=["x", "-", "1", "+", "3"],
     equationResult=0
@@ -93,7 +93,7 @@ view (w, h) s =
   let allElements = Element.flow Element.down
         [
           showEquation s.equation,
-          nameField s.inputString,
+          nameField s.inputContent,
           Element.color Color.red <| Element.show s.errorMessage,
           Element.show s.equationResult
         ]
