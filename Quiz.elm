@@ -1,18 +1,13 @@
 module Quiz where
 
-import Color
 import Debug
 import Graphics.Element exposing (Element)
-import Graphics.Element as Element
 import Graphics.Input.Field as Field
 import Keyboard
 import Maybe
 import Signal
 import Signal exposing ((<~), (~))
 import String
-import Regex
-import Time
-import Time exposing (Time)
 import Window
 
 import View exposing (xInput, view)
