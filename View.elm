@@ -1,4 +1,4 @@
-module View  where
+module View (xInput, view) where
 
 import Color
 import Graphics.Element exposing (Element)
@@ -10,12 +10,12 @@ import String
 
 import Types exposing (Equation, State)
 
-name : Signal.Mailbox Field.Content
-name = Signal.mailbox Field.noContent
+xInput : Signal.Mailbox Field.Content
+xInput = Signal.mailbox Field.noContent
 
-nameField : Field.Content -> Element
-nameField content =
-  Field.field Field.defaultStyle (Signal.message name.address) "Name" content
+xInputField : Field.Content -> Element
+xInputField content =
+  Field.field Field.defaultStyle (Signal.message xInput.address) "Name" content
 
 hideOperator : String -> String
 hideOperator input = case input of
@@ -39,7 +39,7 @@ stateToElement state =
     Element.flow Element.down
       [
         showEquation state.equation,
-        nameField state.inputContent,
+        xInputField state.xInputContent,
         errorElement,
         Element.show state.equationResult
       ]

@@ -6,7 +6,7 @@ import Maybe
 import Time exposing (Time)
 
 type alias Input = {
-  inputContent: Field.Content,
+  xInputContent: Field.Content,
   isEnter: Bool,
   deltaTime: Time,
   equationResult: Float
@@ -16,7 +16,7 @@ type alias Equation = List String
 
 type alias State = {
   equation: Equation,
-  inputContent: Field.Content,
+  xInputContent: Field.Content,
   errorMessage: Maybe String,
   equationResult: Float,
   parsedXValue: Maybe Float
