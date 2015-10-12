@@ -10,7 +10,7 @@ import Signal exposing ((<~), (~))
 import String
 import Window
 
-import View exposing (xInput, view)
+import View exposing (xInput, answerInput, view)
 import Types exposing (Input, Equation, State)
 
 stateToEquationString : State -> Maybe String
@@ -32,8 +32,9 @@ port evalEquationResult : Signal Float
 
 signalInput : Signal Input
 signalInput =
-  let setter = (\xInputContent isEnter eqResult -> {
+  let setter = (\xInputContent answerContent isEnter eqResult -> {
       xInputContent=xInputContent,
+      answerContent=answerContent,
       deltaTime=0,
       isEnter=isEnter,
       equationResult=eqResult
@@ -41,11 +42,12 @@ signalInput =
   in
     setter
       <~ xInput.signal
+      ~ answerInput.signal
       ~ Keyboard.enter
       ~ evalEquationResult
 
 upstate : Input -> State -> State
-upstate {xInputContent, deltaTime, isEnter, equationResult} s =
+upstate {xInputContent, deltaTime, isEnter, equationResult, answerContent} s =
   let numberParseResult = String.toFloat xInputContent.string
 
       errorMessage =
@@ -59,6 +61,7 @@ upstate {xInputContent, deltaTime, isEnter, equationResult} s =
       
   in
   { s | xInputContent <- xInputContent,
+        answerContent <- answerContent,
         errorMessage <- errorMessage,
         equationResult <- equationResult,
         parsedXValue <- parsedXValue}
@@ -66,6 +69,7 @@ upstate {xInputContent, deltaTime, isEnter, equationResult} s =
 initState : State
 initState = {
     xInputContent=Field.noContent,
+    answerContent=Field.noContent,
     errorMessage=Nothing,
     equation=["x", "-", "1", "+", "3"],
     equationResult=0,
