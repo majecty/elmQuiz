@@ -26,12 +26,20 @@ hideOperator input = case input of
   "/" -> "ㅁ"
   _ -> input
 
-showEquation : Equation -> Element
-showEquation equation =
+substituteX : Float -> String -> String
+substituteX xValue token = case token of
+  "x" -> toString xValue
+  _ -> token
+
+showEquation : Equation -> Maybe Float -> Element
+showEquation equation xValue =
   let showableTokens = List.map hideOperator equation
+      substituted = case xValue of
+        Just x -> List.map (substituteX x) showableTokens
+        Nothing -> showableTokens
   in
      Element.leftAligned <| Text.fromString
-       <| String.append "Problem is : " <| String.concat showableTokens
+       <| String.append "Problem is : " <| String.concat substituted
 
 showXInputField : State -> Element
 showXInputField state =
@@ -47,7 +55,7 @@ stateToElement state =
   in
     Element.flow Element.down
       [
-        showEquation state.equation,
+        showEquation state.equation state.parsedXValue,
         showXInputField state,
         errorElement,
         Element.leftAligned <| Text.fromString <| toString <| state.equationResult
