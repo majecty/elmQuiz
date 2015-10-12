@@ -16,7 +16,7 @@ xInput = Signal.mailbox Field.noContent
 
 xInputField : Field.Content -> Element
 xInputField content =
-  Field.field Field.defaultStyle (Signal.message xInput.address) "Name" content
+  Field.field Field.defaultStyle (Signal.message xInput.address) "x = " content
 
 hideOperator : String -> String
 hideOperator input = case input of
@@ -33,6 +33,13 @@ showEquation equation =
      Element.leftAligned <| Text.fromString
        <| String.append "Problem is : " <| String.concat showableTokens
 
+showXInputField : State -> Element
+showXInputField state =
+  let label = Element.leftAligned <| Text.fromString <| "Please Input x"
+      textBox = xInputField state.xInputContent
+  in
+     Element.flow Element.down [ label, textBox ]
+
 stateToElement : State -> Element
 stateToElement state =
   let maybeErrorElement = Maybe.map (Element.color Color.red << Element.show) state.errorMessage
@@ -41,7 +48,7 @@ stateToElement state =
     Element.flow Element.down
       [
         showEquation state.equation,
-        xInputField state.xInputContent,
+        showXInputField state,
         errorElement,
         Element.leftAligned <| Text.fromString <| toString <| state.equationResult
       ]
