@@ -37,9 +37,10 @@ showEquation equation xValue =
       substituted = case xValue of
         Just x -> List.map (substituteX x) showableTokens
         Nothing -> showableTokens
+      yValueAdded = List.append substituted [ "=", "y" ]
   in
      Element.leftAligned <| Text.fromString
-       <| String.append "Problem is : " <| String.concat substituted
+       <| String.append "Problem is : " <| String.concat yValueAdded
 
 showXInputField : State -> Element
 showXInputField state =
