@@ -49,6 +49,13 @@ showXInputField state =
   in
      Element.flow Element.down [ label, textBox ]
 
+showEquationResult : State -> Element
+showEquationResult state =
+  let label = Element.leftAligned <| Text.fromString <| "y = "
+      yText = Element.leftAligned <| Text.fromString <| toString state.equationResult
+  in
+     Element.flow Element.right [label, yText]
+
 stateToElement : State -> Element
 stateToElement state =
   let maybeErrorElement = Maybe.map (Element.color Color.red << Element.show) state.errorMessage
@@ -59,7 +66,7 @@ stateToElement state =
         showEquation state.equation state.parsedXValue,
         showXInputField state,
         errorElement,
-        Element.leftAligned <| Text.fromString <| toString <| state.equationResult
+        showEquationResult state
       ]
 
 view : (Int, Int) -> State -> Element
